@@ -50,6 +50,15 @@ COPY certbot-certonly.sh /usr/bin/certbot-certonly
 COPY certbot-renew.sh /usr/bin/certbot-renew
 RUN chmod +x /usr/bin/haproxy-refresh /usr/bin/haproxy-restart /usr/bin/certbot-certonly /usr/bin/certbot-renew
 
+# Setup logging
+RUN set -x \
+    && apt-get update && apt-get install -y rsyslog \
+    && mkdir -p /etc/rsyslog.d \
+    && touch /var/log/haproxy.log \
+    && ln -sf /dev/stdout /var/log/haproxy.log
+
+COPY rsyslog.conf /etc/rsyslog.d/
+
 # Add startup script
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
