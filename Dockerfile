@@ -1,12 +1,12 @@
-# haproxy1.8.14 with certbot
-FROM debian:jessie
+# haproxy2.0.6 with certbot
+FROM debian:buster
 
-RUN apt-get update && apt-get install -y libssl1.0.0 libpcre3 --no-install-recommends && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y libpcre3 zlib1g --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 # Setup HAProxy
-ENV HAPROXY_MAJOR 1.8
-ENV HAPROXY_VERSION 1.8.14
-RUN buildDeps='curl gcc libc6-dev libpcre3-dev libssl-dev make' \
+ENV HAPROXY_MAJOR 2.0
+ENV HAPROXY_VERSION 2.0.6
+RUN buildDeps='curl gcc libc6-dev libpcre3-dev libssl-dev zlib1g-dev make' \
   && set -x \
   && apt-get update && apt-get install -y $buildDeps --no-install-recommends && rm -rf /var/lib/apt/lists/* \
   && curl -SL "http://www.haproxy.org/download/${HAPROXY_MAJOR}/src/haproxy-${HAPROXY_VERSION}.tar.gz" -o haproxy.tar.gz \
@@ -14,7 +14,7 @@ RUN buildDeps='curl gcc libc6-dev libpcre3-dev libssl-dev make' \
   && tar -xzf haproxy.tar.gz -C /usr/src/haproxy --strip-components=1 \
   && rm haproxy.tar.gz \
   && make -C /usr/src/haproxy \
-    TARGET=linux2628 \
+    TARGET=linux-glibc \
     USE_PCRE=1 PCREDIR= \
     USE_OPENSSL=1 \
     USE_ZLIB=1 \
@@ -35,8 +35,8 @@ RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Install Certbot
-RUN echo 'deb http://ftp.debian.org/debian jessie-backports main' > /etc/apt/sources.list.d/jessie-backports.list
-RUN apt-get update && apt-get install -y certbot -t jessie-backports && \
+RUN echo 'deb http://ftp.debian.org/debian buster main' > /etc/apt/sources.list.d/buster.list
+RUN apt-get update && apt-get install -y certbot -t buster && \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Setup Certbot
